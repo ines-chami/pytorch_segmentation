@@ -1,4 +1,4 @@
-# image transforms 
+# image transforms
 import math
 import numbers
 import random
@@ -6,7 +6,6 @@ import random
 import numpy as np
 import torch
 from PIL import Image, ImageOps
-from skimage.filters import gaussian
 
 
 class RandomVerticalFlip(object):
@@ -45,14 +44,6 @@ class FlipChannels(object):
     def __call__(self, img):
         img = np.array(img)[:, :, ::-1]
         return Image.fromarray(img.astype(np.uint8))
-
-
-class RandomGaussianBlur(object):
-    def __call__(self, img):
-        sigma = 0.15 + random.random() * 1.15
-        blurred_img = gaussian(np.array(img), sigma=sigma, multichannel=True)
-        blurred_img *= 255
-        return Image.fromarray(blurred_img.astype(np.uint8))
 
 
 class Compose(object):
