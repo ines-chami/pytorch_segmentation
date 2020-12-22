@@ -1,10 +1,11 @@
+# evaluation metrics
 import numpy as np
 import torch
-import torch.nn.functional as F
-import torch.nn as nn
+
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self):
         self.initialized = False
         self.val = None
@@ -39,11 +40,13 @@ class AverageMeter(object):
     def average(self):
         return np.round(self.avg, 5)
 
+
 def batch_pix_accuracy(predict, target, labeled):
     pixel_labeled = labeled.sum()
     pixel_correct = ((predict == target) * labeled).sum()
     assert pixel_correct <= pixel_labeled, "Correct area should be smaller than Labeled"
     return pixel_correct.cpu().numpy(), pixel_labeled.cpu().numpy()
+
 
 def batch_intersection_union(predict, target, num_class, labeled):
     predict = predict * labeled.long()
@@ -55,6 +58,7 @@ def batch_intersection_union(predict, target, num_class, labeled):
     area_union = area_pred + area_lab - area_inter
     assert (area_inter <= area_union).all(), "Intersection area should be smaller than Union area"
     return area_inter.cpu().numpy(), area_union.cpu().numpy()
+
 
 def eval_metrics(output, target, num_class):
     _, predict = torch.max(output.data, 1)

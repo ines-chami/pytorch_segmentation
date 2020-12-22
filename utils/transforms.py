@@ -1,17 +1,20 @@
-import random
-import numpy as np
-from PIL import Image, ImageOps, ImageFilter
-from skimage.filters import gaussian
-import torch
+# image transforms 
 import math
 import numbers
 import random
+
+import numpy as np
+import torch
+from PIL import Image, ImageOps
+from skimage.filters import gaussian
+
 
 class RandomVerticalFlip(object):
     def __call__(self, img):
         if random.random() < 0.5:
             return img.transpose(Image.FLIP_TOP_BOTTOM)
         return img
+
 
 class DeNormalize(object):
     def __init__(self, mean, std):
@@ -23,9 +26,11 @@ class DeNormalize(object):
             t.mul_(s).add_(m)
         return tensor
 
+
 class MaskToTensor(object):
     def __call__(self, img):
         return torch.from_numpy(np.array(img, dtype=np.int32)).long()
+
 
 class FreeScale(object):
     def __init__(self, size, interpolation=Image.BILINEAR):
@@ -35,10 +40,12 @@ class FreeScale(object):
     def __call__(self, img):
         return img.resize(self.size, self.interpolation)
 
+
 class FlipChannels(object):
     def __call__(self, img):
         img = np.array(img)[:, :, ::-1]
         return Image.fromarray(img.astype(np.uint8))
+
 
 class RandomGaussianBlur(object):
     def __call__(self, img):
@@ -46,6 +53,7 @@ class RandomGaussianBlur(object):
         blurred_img = gaussian(np.array(img), sigma=sigma, multichannel=True)
         blurred_img *= 255
         return Image.fromarray(blurred_img.astype(np.uint8))
+
 
 class Compose(object):
     def __init__(self, transforms):
@@ -56,6 +64,7 @@ class Compose(object):
         for t in self.transforms:
             img, mask = t(img, mask)
         return img, mask
+
 
 class RandomCrop(object):
     def __init__(self, size, padding=0):
@@ -105,6 +114,7 @@ class RandomHorizontallyFlip(object):
             return img.transpose(Image.FLIP_LEFT_RIGHT), mask.transpose(Image.FLIP_LEFT_RIGHT)
         return img, mask
 
+
 class Scale(object):
     def __init__(self, size):
         self.size = size
@@ -122,6 +132,7 @@ class Scale(object):
             oh = self.size
             ow = int(self.size * w / h)
             return img.resize((ow, oh), Image.BILINEAR), mask.resize((ow, oh), Image.NEAREST)
+
 
 class RandomSizedCrop(object):
     def __init__(self, size):
@@ -156,6 +167,7 @@ class RandomSizedCrop(object):
         crop = CenterCrop(self.size)
         return crop(*scale(img, mask))
 
+
 class RandomRotate(object):
     def __init__(self, degree):
         self.degree = degree
@@ -163,6 +175,7 @@ class RandomRotate(object):
     def __call__(self, img, mask):
         rotate_degree = random.random() * 2 * self.degree - self.degree
         return img.rotate(rotate_degree, Image.BILINEAR), mask.rotate(rotate_degree, Image.NEAREST)
+
 
 class RandomSized(object):
     def __init__(self, size):
@@ -179,6 +192,7 @@ class RandomSized(object):
         img, mask = img.resize((w, h), Image.BILINEAR), mask.resize((w, h), Image.NEAREST)
 
         return self.crop(*self.scale(img, mask))
+
 
 class SlidingCropOld(object):
     def __init__(self, crop_size, stride_rate, ignore_label):
