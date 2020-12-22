@@ -27,7 +27,7 @@ class VOCDataset(BaseDataSet):
         self.label_dir = os.path.join(self.root, 'SegmentationClass')
 
         file_list = os.path.join(self.root, "ImageSets/Segmentation", self.split + ".txt")
-        self.files = [line.rstrip() for line in tuple(open(file_list, "r"))][:20]
+        self.files = [line.rstrip() for line in tuple(open(file_list, "r"))]
 
     def _load_data(self, index):
         image_id = self.files[index]
